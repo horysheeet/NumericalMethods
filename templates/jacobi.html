@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jacobi Method - Numerical Methods Calculator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔢 Numerical Methods Calculator</h1>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/jacobi" class="active">Jacobi Method</a>
+                <a href="/regula-falsi">Regula-Falsi</a>
+                <a href="/forward-fd">Forward FD</a>
+                <a href="/backward-fd">Backward FD</a>
+                <a href="/center-fd">Center FD</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>Jacobi Iterative Method</h2>
+            <p>Solve systems of linear equations Ax = b using the Jacobi iterative method</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="form-section">
+                <h3>Input Parameters</h3>
+                <form method="POST" action="/jacobi">
+                    <div class="form-group">
+                        <label for="matrix_a">Matrix A (JSON format):</label>
+                        <textarea id="matrix_a" name="matrix_a" rows="6" required placeholder='[[4, -1, 0], [1, 4, -1], [0, 1, 4]]'>{% if input_data %}{{ input_data.matrix_a }}{% else %}[[4, -1, 0], [-1, 4, -1], [0, -1, 4]]{% endif %}</textarea>
+                        <small>Example: [[4, -1, 0], [-1, 4, -1], [0, -1, 4]]</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vector_b">Vector b (JSON format):</label>
+                        <textarea id="vector_b" name="vector_b" rows="3" required placeholder='[5, 0, 6]'>{% if input_data %}{{ input_data.vector_b }}{% else %}[5, 0, 6]{% endif %}</textarea>
+                        <small>Example: [5, 0, 6]</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="initial_guess">Initial Guess (optional, JSON format):</label>
+                        <textarea id="initial_guess" name="initial_guess" rows="2" placeholder='[0, 0, 0]'>{% if input_data %}{{ input_data.initial_guess }}{% endif %}</textarea>
+                        <small>Example: [0, 0, 0] (defaults to zeros if not provided)</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="max_iterations">Max Iterations:</label>
+                            <input type="number" id="max_iterations" name="max_iterations" value="{% if input_data and input_data.max_iterations %}{{ input_data.max_iterations }}{% else %}100{% endif %}" placeholder="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tolerance">Tolerance:</label>
+                            <input type="text" id="tolerance" name="tolerance" value="{% if input_data and input_data.tolerance %}{{ input_data.tolerance }}{% else %}0.000001{% endif %}" placeholder="0.000001">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Calculate</button>
+                </form>
+            </div>
+
+            <div class="result-section">
+                {% if result %}
+                    <h3>Results</h3>
+                    
+                    {% if result.success %}
+                        <div class="alert alert-success">
+                            <strong>✓ {{ result.message }}</strong>
+                        </div>
+                        
+                        <div class="result-box">
+                            <h4>Solution Vector</h4>
+                            <div class="solution-display">
+                                {% for val in result.solution %}
+                                    <div class="solution-item">x{{ loop.index }} = {{ "%.6f"|format(val) }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="result-box">
+                            <h4>Convergence Information</h4>
+                            <p><strong>Iterations:</strong> {{ result.iterations }}</p>
+                            <p><strong>Final Error:</strong> {{ "%.2e"|format(result.error) }}</p>
+                        </div>
+
+                        {% if result.diagonal_dominance %}
+                        <div class="result-box {% if result.diagonal_dominance.is_dominant %}alert-info{% else %}alert-warning{% endif %}">
+                            <h4>Diagonal Dominance Check</h4>
+                            <p>{{ result.diagonal_dominance.message }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if result.iteration_log %}
+                        <div class="result-box">
+                            <h4>Iteration Log</h4>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Iteration</th>
+                                            <th>Solution</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in result.iteration_log %}
+                                        <tr>
+                                            <td>{{ log.iteration }}</td>
+                                            <td class="mono">[{% for val in log.solution %}{{ "%.4f"|format(val) }}{% if not loop.last %}, {% endif %}{% endfor %}]</td>
+                                            <td>{{ "%.2e"|format(log.error) }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-error">
+                            <strong>✗ Error:</strong> {{ result.message }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="info-box">
+                        <h3>About Jacobi Method</h3>
+                        <p>The Jacobi method is an iterative algorithm for solving systems of linear equations.</p>
+                        <h4>Algorithm:</h4>
+                        <p>For each equation i, solve for x<sub>i</sub>:</p>
+                        <p class="formula">x<sub>i</sub><sup>(k+1)</sup> = (b<sub>i</sub> - Σ A<sub>ij</sub>x<sub>j</sub><sup>(k)</sup>) / A<sub>ii</sub></p>
+                        <h4>Convergence:</h4>
+                        <ul>
+                            <li>Guaranteed to converge if the matrix is strictly diagonally dominant</li>
+                            <li>May converge for other matrices but not guaranteed</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Numerical Methods Calculator</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forward Finite Difference - Numerical Methods Calculator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔢 Numerical Methods Calculator</h1>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/jacobi">Jacobi Method</a>
+                <a href="/regula-falsi">Regula-Falsi</a>
+                <a href="/forward-fd" class="active">Forward FD</a>
+                <a href="/backward-fd">Backward FD</a>
+                <a href="/center-fd">Center FD</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>Forward Finite Difference</h2>
+            <p>Numerical differentiation using forward differences</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="form-section">
+                <h3>Input Parameters</h3>
+                <form method="POST" action="/forward-fd">
+                    <div class="form-group">
+                        <label for="function">Function f(x) (optional if y-values provided):</label>
+                        <input type="text" id="function" name="function" value="{% if input_data %}{{ input_data.function }}{% else %}x**2{% endif %}" placeholder="x**2">
+                        <small>Use Python syntax. Available: x, sin, cos, tan, exp, log, sqrt, pi, e</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="x_values">X Values (JSON array):</label>
+                        <input type="text" id="x_values" name="x_values" value="{% if input_data %}{{ input_data.x_values }}{% else %}[1, 2, 3]{% endif %}" required placeholder="[1, 2, 3]">
+                        <small>Example: [1, 2, 3] or [0.5]</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y_values">Y Values (optional, JSON array):</label>
+                        <input type="text" id="y_values" name="y_values" value="{% if input_data %}{{ input_data.y_values }}{% endif %}" placeholder="[1, 4, 9]">
+                        <small>Provide if function is not given. Example: [1, 4, 9]</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="order">Derivative Order:</label>
+                            <select id="order" name="order">
+                                <option value="1" {% if input_data and input_data.order == 1 %}selected{% endif %}>First Order (f')</option>
+                                <option value="2" {% if input_data and input_data.order == 2 %}selected{% endif %}>Second Order (f'')</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="h">Step Size (h):</label>
+                            <input type="text" id="h" name="h" value="{% if input_data and input_data.h %}{{ input_data.h }}{% else %}0.01{% endif %}" placeholder="0.01">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Calculate Derivative</button>
+                </form>
+            </div>
+
+            <div class="result-section">
+                {% if result %}
+                    <h3>Results</h3>
+                    
+                    {% if result.success %}
+                        <div class="alert alert-success">
+                            <strong>✓ {{ result.message }}</strong>
+                        </div>
+                        
+                        <div class="result-box">
+                            <h4>Derivative Information</h4>
+                            <p><strong>Order:</strong> {{ result.order }}{% if result.order == 1 %}st (f'){% else %}nd (f''){% endif %}</p>
+                            <p><strong>Step Size (h):</strong> {{ result.h }}</p>
+                        </div>
+
+                        {% if result.points %}
+                        <div class="result-box">
+                            <h4>Computed Derivatives</h4>
+                            {% for point in result.points %}
+                                {% if point.derivative is not none %}
+                                <div class="derivative-result">
+                                    <p><strong>At x = {{ "%.4f"|format(point.x) }}:</strong></p>
+                                    <p class="derivative-value">f{% if result.order == 1 %}'{% else %}''{% endif %}({{ "%.4f"|format(point.x) }}) ≈ {{ "%.8f"|format(point.derivative) }}</p>
+                                    
+                                    {% if point.points_used %}
+                                    <details class="points-used">
+                                        <summary>Points Used</summary>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>x</th>
+                                                    <th>f(x)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for pt in point.points_used %}
+                                                <tr>
+                                                    <td>{{ "%.4f"|format(pt.x) }}</td>
+                                                    <td>{{ "%.6f"|format(pt['f(x)']) }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </details>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning">
+                                    <strong>At x = {{ "%.4f"|format(point.x) }}:</strong> {{ point.error }}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-error">
+                            <strong>✗ Error:</strong> {{ result.message }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="info-box">
+                        <h3>About Forward Finite Difference</h3>
+                        <p>Forward finite difference approximates derivatives using values ahead of the point.</p>
+                        <h4>Formulas:</h4>
+                        <p><strong>First Order:</strong></p>
+                        <p class="formula">f'(x) ≈ (f(x+h) - f(x)) / h</p>
+                        <p><strong>Second Order:</strong></p>
+                        <p class="formula">f''(x) ≈ (f(x+2h) - 2f(x+h) + f(x)) / h²</p>
+                        <h4>Properties:</h4>
+                        <ul>
+                            <li>Uses future points only</li>
+                            <li>Good for problems where backward points aren't available</li>
+                            <li>Truncation error: O(h) for first order, O(h²) for second order</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Numerical Methods Calculator</p>
+        </div>
+    </footer>
+</body>
+</html>

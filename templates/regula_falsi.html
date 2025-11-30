@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regula-Falsi Method - Numerical Methods Calculator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔢 Numerical Methods Calculator</h1>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/jacobi">Jacobi Method</a>
+                <a href="/regula-falsi" class="active">Regula-Falsi</a>
+                <a href="/forward-fd">Forward FD</a>
+                <a href="/backward-fd">Backward FD</a>
+                <a href="/center-fd">Center FD</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>Regula-Falsi Method (False Position)</h2>
+            <p>Find roots of equations using the false position method</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="form-section">
+                <h3>Input Parameters</h3>
+                <form method="POST" action="/regula-falsi">
+                    <div class="form-group">
+                        <label for="function">Function f(x):</label>
+                        <input type="text" id="function" name="function" value="{% if input_data %}{{ input_data.function }}{% else %}x**2 - 4{% endif %}" required placeholder="x**2 - 4">
+                        <small>Use Python syntax. Available: x, sin, cos, tan, exp, log, sqrt, pi, e</small>
+                        <small>Examples: x**2 - 4, sin(x) - 0.5, exp(x) - 2</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="a">Left Endpoint (a):</label>
+                            <input type="number" step="any" id="a" name="a" value="{% if input_data %}{{ input_data.a }}{% else %}0{% endif %}" required placeholder="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="b">Right Endpoint (b):</label>
+                            <input type="number" step="any" id="b" name="b" value="{% if input_data %}{{ input_data.b }}{% else %}3{% endif %}" required placeholder="3">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="max_iterations">Max Iterations:</label>
+                            <input type="number" id="max_iterations" name="max_iterations" value="{% if input_data and input_data.max_iterations %}{{ input_data.max_iterations }}{% else %}100{% endif %}" placeholder="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tolerance">Tolerance:</label>
+                            <input type="text" id="tolerance" name="tolerance" value="{% if input_data and input_data.tolerance %}{{ input_data.tolerance }}{% else %}0.000001{% endif %}" placeholder="0.000001">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Find Root</button>
+                </form>
+            </div>
+
+            <div class="result-section">
+                {% if result %}
+                    <h3>Results</h3>
+                    
+                    {% if result.success %}
+                        <div class="alert alert-success">
+                            <strong>✓ {{ result.message }}</strong>
+                        </div>
+                        
+                        <div class="result-box">
+                            <h4>Root Found</h4>
+                            <p class="root-display">x ≈ {{ "%.10f"|format(result.root) }}</p>
+                        </div>
+
+                        <div class="result-box">
+                            <h4>Convergence Information</h4>
+                            <p><strong>Iterations:</strong> {{ result.iterations }}</p>
+                            <p><strong>Final Error:</strong> {{ "%.2e"|format(result.error) }}</p>
+                        </div>
+
+                        {% if result.iteration_log %}
+                        <div class="result-box">
+                            <h4>Iteration Log</h4>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Iteration</th>
+                                            <th>a</th>
+                                            <th>b</th>
+                                            <th>c</th>
+                                            <th>f(c)</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in result.iteration_log %}
+                                        <tr>
+                                            <td>{{ log.iteration }}</td>
+                                            <td>{{ "%.6f"|format(log.a) }}</td>
+                                            <td>{{ "%.6f"|format(log.b) }}</td>
+                                            <td>{{ "%.6f"|format(log.c) }}</td>
+                                            <td>{{ "%.6f"|format(log['f(c)']) }}</td>
+                                            <td>{{ "%.2e"|format(log.error) }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-error">
+                            <strong>✗ Error:</strong> {{ result.message }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="info-box">
+                        <h3>About Regula-Falsi Method</h3>
+                        <p>The Regula-Falsi (False Position) method is a root-finding algorithm that combines features of the bisection method and the secant method.</p>
+                        <h4>Algorithm:</h4>
+                        <ol>
+                            <li>Start with interval [a, b] where f(a) and f(b) have opposite signs</li>
+                            <li>Find the intersection point: c = (a·f(b) - b·f(a)) / (f(b) - f(a))</li>
+                            <li>Replace a or b with c based on the sign of f(c)</li>
+                            <li>Repeat until convergence</li>
+                        </ol>
+                        <h4>Advantages:</h4>
+                        <ul>
+                            <li>Always converges (if initial interval is valid)</li>
+                            <li>Faster than bisection method</li>
+                            <li>Retains bracketing property</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Numerical Methods Calculator</p>
+        </div>
+    </footer>
+</body>
+</html>

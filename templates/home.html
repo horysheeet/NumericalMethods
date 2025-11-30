@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numerical Methods Calculator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔢 Numerical Methods Calculator</h1>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/jacobi">Jacobi Method</a>
+                <a href="/regula-falsi">Regula-Falsi</a>
+                <a href="/forward-fd">Forward FD</a>
+                <a href="/backward-fd">Backward FD</a>
+                <a href="/center-fd">Center FD</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="welcome-section">
+            <h2>Welcome to Numerical Methods Calculator</h2>
+            <p>Choose a numerical method to get started:</p>
+        </div>
+
+        <div class="methods-grid">
+            <div class="method-card">
+                <h3>Jacobi Method</h3>
+                <p>Iterative method for solving systems of linear equations Ax = b</p>
+                <a href="/jacobi" class="btn">Open Calculator</a>
+            </div>
+
+            <div class="method-card">
+                <h3>Regula-Falsi Method</h3>
+                <p>Find roots of equations using the false position method</p>
+                <a href="/regula-falsi" class="btn">Open Calculator</a>
+            </div>
+
+            <div class="method-card">
+                <h3>Forward Finite Difference</h3>
+                <p>Numerical differentiation using forward differences</p>
+                <a href="/forward-fd" class="btn">Open Calculator</a>
+            </div>
+
+            <div class="method-card">
+                <h3>Backward Finite Difference</h3>
+                <p>Numerical differentiation using backward differences</p>
+                <a href="/backward-fd" class="btn">Open Calculator</a>
+            </div>
+
+            <div class="method-card">
+                <h3>Center Finite Difference</h3>
+                <p>Numerical differentiation using central differences (most accurate)</p>
+                <a href="/center-fd" class="btn">Open Calculator</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Numerical Methods Calculator. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
