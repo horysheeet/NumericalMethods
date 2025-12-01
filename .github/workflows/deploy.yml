@@ -1,46 +1,62 @@
-name: Deploy to GitHub Pages
+name: Deploy to Production
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  deploy:
+  deploy-to-render:
+    name: Trigger Render Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Notify Render
+        run: |
+          echo "Render will auto-deploy from GitHub push"
+          echo "Python Backend: Check Render dashboard for deployment status"
+          echo "Java Backend: Check Render dashboard for deployment status"
+  
+  deploy-documentation:
+    name: Deploy Documentation to GitHub Pages
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      
-      - name: Create static site
+      - name: Create documentation site
         run: |
           mkdir -p _site
-          cat > _site/index.html << 'EOF'
+          cp README.md _site/
+          
+          # Create index.html
+          cat > _site/index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Numerical Methods Calculator - Deployment Guide</title>
+              <title>Numerical Methods Hybrid System</title>
               <style>
                   * { margin: 0; padding: 0; box-sizing: border-box; }
                   body {
-                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                       line-height: 1.6;
                       color: #333;
                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -48,120 +64,112 @@ jobs:
                       padding: 20px;
                   }
                   .container {
-                      max-width: 900px;
+                      max-width: 1000px;
                       margin: 0 auto;
                       background: white;
                       border-radius: 20px;
                       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                      overflow: hidden;
                   }
                   .header {
                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                       color: white;
                       padding: 60px 40px;
                       text-align: center;
+                      border-radius: 20px 20px 0 0;
                   }
                   .header h1 {
-                      font-size: 2.5em;
-                      margin-bottom: 10px;
+                      font-size: 2.8em;
+                      margin-bottom: 15px;
                       font-weight: 700;
                   }
                   .header p {
-                      font-size: 1.2em;
-                      opacity: 0.9;
+                      font-size: 1.3em;
+                      opacity: 0.95;
+                  }
+                  .badges {
+                      display: flex;
+                      justify-content: center;
+                      gap: 10px;
+                      margin-top: 20px;
+                      flex-wrap: wrap;
+                  }
+                  .badge {
+                      background: rgba(255,255,255,0.2);
+                      padding: 8px 16px;
+                      border-radius: 20px;
+                      font-size: 0.9em;
                   }
                   .content {
-                      padding: 40px;
+                      padding: 50px 40px;
                   }
                   .section {
-                      margin-bottom: 40px;
+                      margin-bottom: 50px;
                   }
                   .section h2 {
                       color: #667eea;
-                      font-size: 1.8em;
-                      margin-bottom: 20px;
+                      font-size: 2em;
+                      margin-bottom: 25px;
                       border-bottom: 3px solid #667eea;
-                      padding-bottom: 10px;
+                      padding-bottom: 12px;
                   }
-                  .section h3 {
-                      color: #764ba2;
-                      font-size: 1.3em;
-                      margin: 20px 0 10px;
-                  }
-                  .info-box {
-                      background: #f8f9ff;
-                      border-left: 4px solid #667eea;
-                      padding: 20px;
-                      margin: 20px 0;
-                      border-radius: 8px;
-                  }
-                  .warning-box {
-                      background: #fff9e6;
-                      border-left: 4px solid #ffc107;
-                      padding: 20px;
-                      margin: 20px 0;
-                      border-radius: 8px;
-                  }
-                  .deployment-options {
+                  .deployment-grid {
                       display: grid;
-                      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                      gap: 20px;
+                      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                      gap: 30px;
                       margin: 30px 0;
                   }
-                  .option-card {
-                      background: white;
-                      border: 2px solid #e0e0e0;
-                      border-radius: 12px;
-                      padding: 25px;
+                  .deployment-card {
+                      background: linear-gradient(135deg, #f8f9ff 0%, #e8ebff 100%);
+                      border-radius: 15px;
+                      padding: 30px;
                       transition: all 0.3s ease;
-                      cursor: pointer;
+                      border: 2px solid transparent;
                   }
-                  .option-card:hover {
+                  .deployment-card:hover {
                       border-color: #667eea;
-                      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+                      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
                       transform: translateY(-5px);
                   }
-                  .option-card h3 {
-                      color: #667eea;
-                      margin-top: 0;
-                      font-size: 1.4em;
+                  .deployment-card h3 {
+                      color: #764ba2;
+                      font-size: 1.6em;
+                      margin-bottom: 15px;
                   }
-                  .option-card .badge {
+                  .deployment-card .status {
                       display: inline-block;
-                      background: #667eea;
+                      background: #4caf50;
                       color: white;
-                      padding: 4px 12px;
-                      border-radius: 12px;
-                      font-size: 0.8em;
-                      margin-bottom: 10px;
+                      padding: 6px 14px;
+                      border-radius: 15px;
+                      font-size: 0.85em;
+                      font-weight: 600;
+                      margin-bottom: 15px;
                   }
-                  .option-card .badge.free { background: #4caf50; }
-                  .option-card .badge.paid { background: #ff9800; }
-                  code {
-                      background: #f4f4f4;
-                      padding: 3px 8px;
-                      border-radius: 4px;
-                      font-family: 'Courier New', monospace;
-                      font-size: 0.9em;
+                  .deployment-card .status.pending {
+                      background: #ff9800;
                   }
-                  pre {
-                      background: #2d2d2d;
-                      color: #f8f8f2;
-                      padding: 20px;
-                      border-radius: 8px;
-                      overflow-x: auto;
-                      margin: 15px 0;
-                  }
-                  pre code {
-                      background: none;
-                      color: inherit;
+                  .deployment-card ul {
+                      list-style: none;
                       padding: 0;
+                      margin: 20px 0;
+                  }
+                  .deployment-card li {
+                      padding: 8px 0;
+                      padding-left: 25px;
+                      position: relative;
+                  }
+                  .deployment-card li:before {
+                      content: "✓";
+                      position: absolute;
+                      left: 0;
+                      color: #4caf50;
+                      font-weight: bold;
                   }
                   .btn {
                       display: inline-block;
                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                       color: white;
-                      padding: 12px 30px;
+                      padding: 14px 32px;
                       border-radius: 25px;
                       text-decoration: none;
                       font-weight: 600;
@@ -170,220 +178,201 @@ jobs:
                   }
                   .btn:hover {
                       transform: translateY(-2px);
-                      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+                      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+                  }
+                  .btn.secondary {
+                      background: white;
+                      color: #667eea;
+                      border: 2px solid #667eea;
                   }
                   .feature-list {
+                      background: #f8f9ff;
+                      border-left: 4px solid #667eea;
+                      padding: 25px;
+                      margin: 25px 0;
+                      border-radius: 8px;
+                  }
+                  .feature-list h3 {
+                      color: #667eea;
+                      margin-bottom: 15px;
+                  }
+                  .feature-list ul {
                       list-style: none;
                       padding: 0;
                   }
                   .feature-list li {
-                      padding: 10px 0;
-                      padding-left: 30px;
+                      padding: 8px 0;
+                      padding-left: 25px;
                       position: relative;
                   }
                   .feature-list li:before {
-                      content: "✓";
+                      content: "→";
                       position: absolute;
                       left: 0;
-                      color: #4caf50;
+                      color: #667eea;
                       font-weight: bold;
-                      font-size: 1.2em;
                   }
                   .footer {
                       background: #f8f9ff;
-                      padding: 30px 40px;
+                      padding: 40px;
                       text-align: center;
                       color: #666;
+                      border-radius: 0 0 20px 20px;
+                  }
+                  code {
+                      background: #f4f4f4;
+                      padding: 4px 8px;
+                      border-radius: 4px;
+                      font-family: 'Courier New', monospace;
+                      font-size: 0.9em;
                   }
               </style>
           </head>
           <body>
               <div class="container">
                   <div class="header">
-                      <h1>🔢 Numerical Methods Calculator</h1>
-                      <p>Professional Web Application for Numerical Analysis</p>
+                      <h1>🔢 Numerical Methods Hybrid System</h1>
+                      <p>Dual Backend Architecture: Python FastAPI + Java Spring Boot</p>
+                      <div class="badges">
+                          <span class="badge">🐍 Python 3.13</span>
+                          <span class="badge">☕ Java 21</span>
+                          <span class="badge">🚀 FastAPI</span>
+                          <span class="badge">🍃 Spring Boot</span>
+                          <span class="badge">🐳 Docker</span>
+                          <span class="badge">📄 MIT License</span>
+                      </div>
                   </div>
                   
                   <div class="content">
-                      <div class="warning-box">
-                          <strong>⚠️ Note:</strong> This is a FastAPI application that requires a backend server to run. 
-                          GitHub Pages only hosts static files (HTML/CSS/JavaScript), so this page provides deployment options 
-                          for hosting the full application.
-                      </div>
-
                       <div class="section">
-                          <h2>📦 About This Project</h2>
-                          <p>The Numerical Methods Calculator is a production-ready web application featuring:</p>
-                          <ul class="feature-list">
-                              <li>5 numerical methods (Jacobi, Regula-Falsi, Forward/Backward/Central Finite Difference)</li>
-                              <li>FastAPI backend with async support</li>
-                              <li>Interactive web interface with HTML+CSS</li>
-                              <li>RESTful API endpoints</li>
-                              <li>Comprehensive test suite (40+ tests)</li>
-                              <li>Professional documentation</li>
-                          </ul>
-                      </div>
-
-                      <div class="section">
-                          <h2>🚀 Deployment Options</h2>
-                          <p>Choose one of these platforms to deploy your application online:</p>
-                          
-                          <div class="deployment-options">
-                              <div class="option-card">
-                                  <span class="badge free">FREE</span>
-                                  <h3>Render</h3>
-                                  <p>Easy deployment with free tier. Auto-deploys from GitHub.</p>
-                                  <ul class="feature-list">
-                                      <li>Free tier available</li>
-                                      <li>Auto-deploy from Git</li>
-                                      <li>HTTPS included</li>
+                          <h2>🌐 Live Deployments</h2>
+                          <div class="deployment-grid">
+                              <div class="deployment-card">
+                                  <h3>🐍 Python Backend</h3>
+                                  <span class="status pending">Deploying...</span>
+                                  <p><strong>FastAPI + Uvicorn</strong></p>
+                                  <ul>
+                                      <li>Port: 8000</li>
+                                      <li>Framework: FastAPI</li>
+                                      <li>Python: 3.13</li>
                                   </ul>
-                                  <a href="https://render.com" class="btn" target="_blank">Deploy on Render</a>
+                                  <p><small>URL will be available after Render deployment</small></p>
                               </div>
-
-                              <div class="option-card">
-                                  <span class="badge free">FREE</span>
-                                  <h3>Railway</h3>
-                                  <p>Modern platform with generous free tier and excellent developer experience.</p>
-                                  <ul class="feature-list">
-                                      <li>$5 free credit/month</li>
-                                      <li>GitHub integration</li>
-                                      <li>Auto-scaling</li>
+                              
+                              <div class="deployment-card">
+                                  <h3>☕ Java Backend</h3>
+                                  <span class="status pending">Deploying...</span>
+                                  <p><strong>Spring Boot + Maven</strong></p>
+                                  <ul>
+                                      <li>Port: 8080</li>
+                                      <li>Framework: Spring Boot 3.2</li>
+                                      <li>Java: 21</li>
                                   </ul>
-                                  <a href="https://railway.app" class="btn" target="_blank">Deploy on Railway</a>
-                              </div>
-
-                              <div class="option-card">
-                                  <span class="badge free">FREE</span>
-                                  <h3>Fly.io</h3>
-                                  <p>Fast global deployment with Docker support.</p>
-                                  <ul class="feature-list">
-                                      <li>Free tier available</li>
-                                      <li>Global edge network</li>
-                                      <li>Docker-based</li>
-                                  </ul>
-                                  <a href="https://fly.io" class="btn" target="_blank">Deploy on Fly.io</a>
-                              </div>
-
-                              <div class="option-card">
-                                  <span class="badge paid">PAID</span>
-                                  <h3>Heroku</h3>
-                                  <p>Reliable platform with extensive documentation.</p>
-                                  <ul class="feature-list">
-                                      <li>Established platform</li>
-                                      <li>Add-ons ecosystem</li>
-                                      <li>Good documentation</li>
-                                  </ul>
-                                  <a href="https://heroku.com" class="btn" target="_blank">Deploy on Heroku</a>
-                              </div>
-
-                              <div class="option-card">
-                                  <span class="badge free">FREE</span>
-                                  <h3>PythonAnywhere</h3>
-                                  <p>Python-focused hosting with free tier.</p>
-                                  <ul class="feature-list">
-                                      <li>Python-specific</li>
-                                      <li>Free tier available</li>
-                                      <li>Easy setup</li>
-                                  </ul>
-                                  <a href="https://www.pythonanywhere.com" class="btn" target="_blank">Deploy on PythonAnywhere</a>
-                              </div>
-
-                              <div class="option-card">
-                                  <span class="badge free">FREE</span>
-                                  <h3>Vercel</h3>
-                                  <p>Fast deployment with serverless functions.</p>
-                                  <ul class="feature-list">
-                                      <li>Serverless Python</li>
-                                      <li>Free tier</li>
-                                      <li>Instant deployment</li>
-                                  </ul>
-                                  <a href="https://vercel.com" class="btn" target="_blank">Deploy on Vercel</a>
+                                  <p><small>URL will be available after Render deployment</small></p>
                               </div>
                           </div>
                       </div>
 
                       <div class="section">
-                          <h2>⚡ Quick Deploy: Render (Recommended)</h2>
-                          <p>The easiest way to deploy this application:</p>
-                          
-                          <div class="info-box">
-                              <h3>Step 1: Prepare Your Repository</h3>
-                              <p>Your repository already includes:</p>
-                              <ul class="feature-list">
-                                  <li>Dockerfile for containerization</li>
-                                  <li>requirements.txt for dependencies</li>
-                                  <li>All necessary configuration files</li>
+                          <h2>📚 About This Project</h2>
+                          <div class="feature-list">
+                              <h3>Numerical Methods Implemented</h3>
+                              <ul>
+                                  <li><strong>Jacobi Method:</strong> Iterative solver for linear systems</li>
+                                  <li><strong>Regula-Falsi:</strong> Root finding algorithm</li>
+                                  <li><strong>Forward Finite Difference:</strong> Numerical differentiation</li>
+                                  <li><strong>Backward Finite Difference:</strong> Numerical differentiation</li>
+                                  <li><strong>Central Finite Difference:</strong> Numerical differentiation</li>
                               </ul>
                           </div>
 
-                          <div class="info-box">
-                              <h3>Step 2: Deploy on Render</h3>
-                              <ol style="padding-left: 20px;">
-                                  <li>Go to <a href="https://render.com" target="_blank">render.com</a> and sign up with GitHub</li>
-                                  <li>Click "New +" → "Web Service"</li>
-                                  <li>Connect your <code>horysheeet/NumericalMethods</code> repository</li>
-                                  <li>Configure:
-                                      <ul>
-                                          <li><strong>Name:</strong> numerical-methods-calculator</li>
-                                          <li><strong>Environment:</strong> Docker</li>
-                                          <li><strong>Plan:</strong> Free</li>
-                                      </ul>
-                                  </li>
-                                  <li>Click "Create Web Service"</li>
-                                  <li>Wait 2-3 minutes for deployment</li>
-                                  <li>Your app will be live at <code>https://numerical-methods-calculator.onrender.com</code></li>
-                              </ol>
-                          </div>
-
-                          <div class="warning-box">
-                              <strong>💡 Free Tier Note:</strong> Render's free tier may spin down after 15 minutes of inactivity. 
-                              The first request after inactivity may take 30-60 seconds to wake up the service.
+                          <div class="feature-list">
+                              <h3>🏗️ Architecture Highlights</h3>
+                              <ul>
+                                  <li>Dual backend system (Python + Java)</li>
+                                  <li>RESTful API design</li>
+                                  <li>Docker containerization</li>
+                                  <li>Automated CI/CD with GitHub Actions</li>
+                                  <li>Comprehensive test coverage</li>
+                                  <li>Production-ready deployment</li>
+                              </ul>
                           </div>
                       </div>
 
                       <div class="section">
-                          <h2>🏃 Run Locally</h2>
-                          <p>To run the application on your local machine:</p>
+                          <h2>🚀 Quick Start</h2>
+                          <div class="feature-list">
+                              <h3>Clone and Run Locally</h3>
+                              <ul>
+                                  <li>Clone: <code>git clone https://github.com/horysheeet/numerical-methods-hybrid-system.git</code></li>
+                                  <li>Python: <code>python main.py</code> (runs on http://localhost:8000)</li>
+                                  <li>Java: <code>cd java-backend && mvn spring-boot:run</code> (runs on http://localhost:8080)</li>
+                              </ul>
+                          </div>
                           
-                          <pre><code># Clone the repository
-git clone https://github.com/horysheeet/NumericalMethods.git
-cd NumericalMethods
-
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # macOS/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the server
-python main.py
-
-# Visit http://localhost:8000</code></pre>
+                          <div style="text-align: center; margin: 30px 0;">
+                              <a href="https://github.com/horysheeet/numerical-methods-hybrid-system" class="btn">
+                                  📂 View on GitHub
+                              </a>
+                              <a href="https://github.com/horysheeet/numerical-methods-hybrid-system/blob/main/README.md" class="btn secondary">
+                                  📖 Read Documentation
+                              </a>
+                          </div>
                       </div>
 
                       <div class="section">
-                          <h2>📚 Resources</h2>
-                          <ul class="feature-list">
-                              <li><a href="https://github.com/horysheeet/NumericalMethods" target="_blank">GitHub Repository</a></li>
-                              <li><a href="https://github.com/horysheeet/NumericalMethods/blob/main/README.md" target="_blank">Full Documentation</a></li>
-                              <li><a href="https://github.com/horysheeet/NumericalMethods/blob/main/CONTRIBUTING.md" target="_blank">Contributing Guide</a></li>
-                              <li><a href="https://github.com/horysheeet/NumericalMethods/blob/main/GITHUB_UPLOAD_GUIDE.md" target="_blank">Deployment Guide</a></li>
-                          </ul>
+                          <h2>🔧 Technologies Used</h2>
+                          <div class="deployment-grid">
+                              <div class="deployment-card">
+                                  <h3>Python Stack</h3>
+                                  <ul>
+                                      <li>FastAPI 0.122.0</li>
+                                      <li>Uvicorn (ASGI server)</li>
+                                      <li>NumPy (numerical computing)</li>
+                                      <li>Pytest (testing)</li>
+                                  </ul>
+                              </div>
+                              
+                              <div class="deployment-card">
+                                  <h3>Java Stack</h3>
+                                  <ul>
+                                      <li>Spring Boot 3.2.0</li>
+                                      <li>Maven 3.9</li>
+                                      <li>Java 21 (Temurin)</li>
+                                      <li>JUnit 5 (testing)</li>
+                                  </ul>
+                              </div>
+                              
+                              <div class="deployment-card">
+                                  <h3>DevOps</h3>
+                                  <ul>
+                                      <li>Docker & Docker Compose</li>
+                                      <li>GitHub Actions CI/CD</li>
+                                      <li>Render (deployment)</li>
+                                      <li>GitHub Pages (docs)</li>
+                                  </ul>
+                              </div>
+                          </div>
                       </div>
                   </div>
 
                   <div class="footer">
-                      <p><strong>Numerical Methods Calculator</strong> v1.0.0</p>
-                      <p>Built with ❤️ using FastAPI and Python</p>
-                      <p>&copy; 2025 horysheeet | MIT License</p>
+                      <p><strong>Numerical Methods Hybrid System</strong></p>
+                      <p>Dual Backend Implementation: Python FastAPI + Java Spring Boot</p>
+                      <p>&copy; 2025 | MIT License</p>
+                      <p style="margin-top: 15px;">
+                          <a href="https://github.com/horysheeet/numerical-methods-hybrid-system" style="color: #667eea; text-decoration: none;">
+                              GitHub Repository
+                          </a>
+                      </p>
                   </div>
               </div>
           </body>
           </html>
-          EOF
+          HTMLEOF
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

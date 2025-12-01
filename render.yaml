@@ -1,9 +1,36 @@
+# Render Deployment Configuration for Dual Backend System
+
 services:
+  # Python FastAPI Backend
   - type: web
-    name: numerical-methods-calculator
-    runtime: docker
+    name: numerical-methods-python
+    env: python
+    region: oregon
     plan: free
-    healthCheckPath: /
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
       - key: PORT
         value: 8000
+    healthCheckPath: /
+    
+  # Java Spring Boot Backend
+  - type: web
+    name: numerical-methods-java
+    env: java
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: cd java-backend && mvn clean install -DskipTests
+    startCommand: java -Dserver.port=$PORT -jar java-backend/target/numerical-methods-calculator-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 21
+      - key: PORT
+        value: 8080
+      - key: MAVEN_OPTS
+        value: -Xmx512m
+    healthCheckPath: /api/jacobi/health

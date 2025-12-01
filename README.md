@@ -1,16 +1,19 @@
 # 🔢 Numerical Methods Calculator
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![Java Version](https://img.shields.io/badge/java-21%2B-orange.svg)](https://www.oracle.com/java/technologies/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-6DB33F.svg)](https://spring.io/projects/spring-boot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](tests/)
 
-A professional, production-ready web application for solving numerical analysis problems. Built with **Python FastAPI** backend and clean **HTML+CSS** frontend, this calculator provides interactive implementations of five core numerical methods commonly used in scientific computing and engineering.
+A professional, production-ready web application for solving numerical analysis problems with **dual-backend architecture**. Choose between **Python FastAPI** or **Java Spring Boot** backends, both providing identical functionality through RESTful APIs with a clean **HTML+CSS** frontend.
 
 ## 📋 Table of Contents
 
 - [Features](#-features)
 - [System Architecture](#-system-architecture)
+- [Dual Backend Architecture](#-dual-backend-architecture)
 - [Numerical Methods](#-numerical-methods)
 - [Project Structure](#-project-structure)
 - [Installation](#-installation)
@@ -34,15 +37,41 @@ A professional, production-ready web application for solving numerical analysis 
 
 ### Key Capabilities
 
-- ✅ **Interactive Web Interface** - Clean, responsive HTML+CSS UI (no JavaScript required)
-- ✅ **RESTful API** - JSON endpoints for all numerical methods
+- ✅ **Dual Backend Support** - Python FastAPI (port 8000) + Java Spring Boot (port 8080)
+- ✅ **Interactive Web Interface** - Clean, responsive HTML+CSS UI
+- ✅ **RESTful API** - JSON endpoints for all numerical methods (both backends)
 - ✅ **Iteration Tracking** - Detailed logs showing convergence progress
 - ✅ **Error Handling** - Comprehensive validation and error messages
-- ✅ **Configuration System** - Centralized config.json for all parameters
-- ✅ **Full Test Coverage** - 40+ unit tests with pytest
-- ✅ **Production Ready** - FastAPI with async support and automatic documentation
+- ✅ **Configuration System** - Centralized configuration for both backends
+- ✅ **Full Test Coverage** - 40+ unit tests with pytest (Python)
+- ✅ **Production Ready** - FastAPI with async support + Spring Boot with dependency injection
+- ✅ **CORS Enabled** - Both backends support cross-origin requests
 
 ## 🏗️ System Architecture
+
+### Dual Backend Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│           Frontend (HTML + CSS)                 │
+│        (Served by Python FastAPI)               │
+└───────────────────┬─────────────────────────────┘
+                    │
+        ┌───────────┴──────────┐
+        │                      │
+        ▼                      ▼
+┌───────────────┐      ┌──────────────┐
+│ Python Backend│      │ Java Backend │
+│  (FastAPI)    │      │ (Spring Boot)│
+│  Port: 8000   │      │  Port: 8080  │
+├───────────────┤      ├──────────────┤
+│ • Templates   │      │ • REST API   │
+│ • REST API    │      │ • CORS       │
+│ • 5 Methods   │      │ • 5 Methods  │
+└───────────────┘      └──────────────┘
+```
+
+### Python Backend Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -202,46 +231,128 @@ Numerical Methods/
 │   ├── forward_fd.html
 │   ├── backward_fd.html
 │   └── center_fd.html
-└── static/                          # CSS styling
-    └── style.css
+├── static/                          # CSS styling
+│   └── style.css
+└── java-backend/                    # Java Spring Boot backend
+    ├── pom.xml                      # Maven configuration
+    ├── README.md                    # Java backend documentation
+    └── src/
+        ├── main/
+        │   ├── java/com/numerical/calculator/
+        │   │   ├── NumericalMethodsApplication.java
+        │   │   ├── config/
+        │   │   │   └── CorsConfig.java
+        │   │   ├── controller/
+        │   │   │   ├── JacobiController.java
+        │   │   │   ├── RegulaFalsiController.java
+        │   │   │   └── FiniteDifferenceController.java
+        │   │   ├── model/
+        │   │   │   ├── JacobiRequest.java
+        │   │   │   ├── RegulaFalsiRequest.java
+        │   │   │   ├── FiniteDifferenceRequest.java
+        │   │   │   └── NumericalResponse.java
+        │   │   └── service/
+        │   │       ├── JacobiService.java
+        │   │       ├── RegulaFalsiService.java
+        │   │       └── FiniteDifferenceService.java
+        │   └── resources/
+        │       └── application.properties
+        └── test/
 ```
 
-## Installation
+## 📦 Installation
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- pip (Python package manager)
+- **Python Backend**: Python 3.8+ with pip
+- **Java Backend** (optional): Java 21+ with Maven 3.6+
 
-### Setup Instructions
+### Python Backend Setup
 
 1. **Clone or navigate to the project directory**:
    ```bash
    cd "d:\Numerical Methods"
    ```
 
-2. **Install dependencies**:
+2. **Create virtual environment** (recommended):
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate  # Windows
+   ```
+
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-## Running the Application
+### Java Backend Setup
 
-### Method 1: Using uvicorn directly
+1. **Navigate to Java backend directory**:
+   ```bash
+   cd java-backend
+   ```
 
+2. **Build with Maven**:
+   ```bash
+   mvn clean install
+   ```
+
+## 🚀 Running the Application
+
+### Python Backend (Port 8000)
+
+**Method 1: Using uvicorn**
 ```bash
 uvicorn main:app --reload
 ```
 
-### Method 2: Using Python directly
+**Method 2: Using start script**
+```powershell
+.\start.ps1
+```
 
+**Method 3: Using Python directly**
 ```bash
 python main.py
 ```
 
-The application will start on `http://localhost:8000`
+Access at: `http://localhost:8000`
 
-## Usage
+### Java Backend (Port 8080)
+
+**Method 1: Using Maven**
+```bash
+cd java-backend
+mvn spring-boot:run
+```
+
+**Method 2: Using JAR**
+```bash
+java -jar java-backend/target/numerical-methods-calculator-0.0.1-SNAPSHOT.jar
+```
+
+Access at: `http://localhost:8080`
+
+### Running Both Backends Simultaneously
+
+Open two terminals:
+
+**Terminal 1 (Python)**:
+```bash
+cd "d:\Numerical Methods"
+.venv\Scripts\activate
+uvicorn main:app --reload
+```
+
+**Terminal 2 (Java)**:
+```bash
+cd "d:\Numerical Methods\java-backend"
+mvn spring-boot:run
+```
+
+> **Note**: See [DUAL_BACKEND_INTEGRATION.md](DUAL_BACKEND_INTEGRATION.md) for detailed integration guide.
+
+## 💻 Usage
 
 ### Web Interface
 
@@ -253,15 +364,22 @@ The application will start on `http://localhost:8000`
 
 ### API Endpoints
 
-All methods also expose JSON API endpoints:
-
+#### Python Backend (http://localhost:8000)
 - **POST** `/api/jacobi` - Jacobi method
 - **POST** `/api/regula-falsi` - Regula-Falsi method
 - **POST** `/api/forward-fd` - Forward finite difference
 - **POST** `/api/backward-fd` - Backward finite difference
 - **POST** `/api/center-fd` - Center finite difference
 
-## Examples
+#### Java Backend (http://localhost:8080)
+- **POST** `/api/jacobi` - Jacobi method
+- **POST** `/api/regula-falsi` - Regula-Falsi method
+- **POST** `/api/finite-difference/forward` - Forward finite difference
+- **POST** `/api/finite-difference/backward` - Backward finite difference
+- **POST** `/api/finite-difference/central` - Central finite difference
+- **GET** `/api/*/health` - Health check endpoints
+
+## 📚 Examples
 
 ### Jacobi Method
 
