@@ -7,13 +7,31 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 Write-Host "Installing test dependencies..." -ForegroundColor Yellow
-pip install pytest numpy -q
+
+# Choose Python launcher: try 'python', then 'py -3'
+$pythonCmd = $null
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    $pythonCmd = "python"
+} elseif (Get-Command py -ErrorAction SilentlyContinue) {
+    $pythonCmd = "py -3"
+}
+
+if (-not $pythonCmd) {
+    Write-Host "ERROR: Python not found on PATH. Please install Python 3.8+ and ensure it's available as 'python' or 'py' in your PATH." -ForegroundColor Red
+    Write-Host "Visit https://python.org/downloads or use winget: 'winget install Python.Python.3'" -ForegroundColor Yellow
+    exit 1
+}
+
+# Use the chosen launcher to run pip (ensures we invoke the same Python interpreter)
+& $pythonCmd -m pip install --upgrade pip -q
+& $pythonCmd -m pip install -r requirements.txt -q
+& $pythonCmd -m pip install -r requirements-dev.txt -q
 
 Write-Host ""
 Write-Host "Running tests..." -ForegroundColor Yellow
 Write-Host ""
 
-pytest test_numerical_methods.py -v --tb=short
+& $pythonCmd -m pytest test_numerical_methods.py -v --tb=short
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""

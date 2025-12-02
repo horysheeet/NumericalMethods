@@ -2,7 +2,8 @@
 # These are additional packages needed for development, testing, and code quality
 
 # Testing
-pytest==9.0.1
+# Use a pytest version compatible across our CI matrix (3.8+)
+pytest==7.4.3
 pytest-cov==6.0.0
 pytest-asyncio==0.25.2
 httpx==0.28.1
